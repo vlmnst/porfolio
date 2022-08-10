@@ -7,7 +7,6 @@ const Landing = (props) => {
     useEffect(() => {
     const canvas = canvasRef.current
     const ctx = canvas.getContext('2d')
-    console.log(ctx)
     canvas.width = window.innerWidth;
     canvas.height = window.innerHeight;
  
@@ -24,11 +23,10 @@ const Landing = (props) => {
         })
 
     //draw text
-        ctx.fillStyle = 'red';
+        ctx.fillStyle = 'white';
         ctx.font = '30px Verdana';
         ctx.fillText('Hello World', 10 , 50);   
         const textCoordinates = ctx.getImageData(0, 0, 300, 300)
-        console.log(textCoordinates)
 
     class Particle {
         constructor(x, y){
@@ -57,8 +55,9 @@ const Landing = (props) => {
             let directionX = forceDirectionX * force * this.density;
             let directionY = forceDirectionY * force * this.density;
                 if (distance < mouse.radius){
-                    this.x += directionX;
-                    this.y += directionY;
+                    this.x -= directionX;
+                    this.y -= directionY;
+                    ctx.fillStyle = 'red'
                 }else{
                    if(this.x !== this.baseX){
                     let dx = this.x - this.baseX;
@@ -75,10 +74,6 @@ const Landing = (props) => {
         function init() {
             
             particleArray = [];
-            // for (let i = 0; i < 5000; i++){
-            //     let x = Math.random() * canvas.width;
-            //     let y = Math.random() * canvas.height;
-            //     particleArray.push(new Particle (x, y)); } 
             for(let y = 0, y2 = textCoordinates.height; y < y2; y++){
                 for(let x = 0, x2 = textCoordinates.width; x < x2; x++){
                   let a =  (y * 4 * textCoordinates.width);
@@ -93,10 +88,27 @@ const Landing = (props) => {
                     }
                 }
             }
-           
         }
         init();
-      
+        let opacityValue = 1
+        function connect(){
+            for (let a = 0; a < particleArray.length; a++){
+                for (let b = 0; b < particleArray.length; b++){
+                    let dx = particleArray[a].x - particleArray[b].x;
+                    let dy = particleArray[a].y- particleArray[b].y;
+                    let distance = Math.sqrt(dx * dx + dy * dy);
+                    if(distance < 15){
+                        opacityValue = 1 - (distance/20)
+                        ctx.strokeStyle = 'rgba(255, 255, 255,' + opacityValue + ')';
+                        ctx.lineWidht = 2;
+                        ctx.beginPath();
+                        ctx.moveTo(particleArray[a].x, particleArray[a].y);
+                        ctx.lineTo(particleArray[b].x, particleArray[b].y);
+                        ctx.stroke();
+                    }
+                }
+            }
+        }
 
         function animate(){
             ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -104,6 +116,7 @@ const Landing = (props) => {
                 particleArray[i].draw();
                 particleArray[i].update();
             }
+            connect()
             requestAnimationFrame(animate)
         }
         animate()
