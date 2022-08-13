@@ -1,6 +1,6 @@
 import React, { useEffect, useRef } from 'react'
 import styles from '../css/stylesglobal.css'
-
+import Particle from './Particle';
 const Landing = (props) => {
     const canvasRef = useRef(null)
 
@@ -8,14 +8,15 @@ const Landing = (props) => {
     const canvas = canvasRef.current
     const ctx = canvas.getContext('2d')
     canvas.width = window.innerWidth;
-    canvas.height = window.innerHeight;
+    canvas.height = window.innerHeight/2;
  
     let particleArray = []
     const mouse = {
         x: null,
         y: null,
         radius: 100
-    }
+    }    
+
     //handle mouse    
     window.addEventListener('mousemove', function(event){
             mouse.x = event.x;
@@ -24,55 +25,11 @@ const Landing = (props) => {
 
     //draw text
         ctx.fillStyle = 'white';
-        ctx.font = '30px Verdana';
-        ctx.fillText('Hello World', 10 , 50);   
+        ctx.font = '29px Serif';
+        ctx.fillText('Hello World', 15 , 40);   
         const textCoordinates = ctx.getImageData(0, 0, 300, 300)
 
-    class Particle {
-        constructor(x, y){
-            this.x = x;
-            this.y = y;
-            this.size = 2;
-            this.baseX = this.x;
-            this.baseY = this.y;
-            this.density = (Math.random() * 100 )+ 5;
-            }
-        draw(){
-            ctx.fillStyle = 'white';
-            ctx.beginPath();
-            ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
-            ctx.closePath();
-            ctx.fill();
-            }
-        update(){
-            let dx = mouse.x - this.x;
-            let dy = mouse.y - this.y;
-            let distance = Math.sqrt(dx * dx + dy * dy);
-            let forceDirectionX = dx / distance;
-            let forceDirectionY = dy / distance;
-            let maxDistance = mouse.radius;
-            let force = (maxDistance - distance) / maxDistance;
-            let directionX = forceDirectionX * force * this.density;
-            let directionY = forceDirectionY * force * this.density;
-                if (distance < mouse.radius){
-                    this.x -= directionX;
-                    this.y -= directionY;
-                    ctx.fillStyle = 'red'
-                }else{
-                   if(this.x !== this.baseX){
-                    let dx = this.x - this.baseX;
-                    this.x -= dx/7;
-                   }
-                   if(this.y !== this.baseY){
-                    let dy = this.y - this.baseY;
-                    this.y -= dy/7;
-                   }
-                }
-            }
-        }
-
         function init() {
-            
             particleArray = [];
             for(let y = 0, y2 = textCoordinates.height; y < y2; y++){
                 for(let x = 0, x2 = textCoordinates.width; x < x2; x++){
@@ -113,19 +70,18 @@ const Landing = (props) => {
         function animate(){
             ctx.clearRect(0, 0, canvas.width, canvas.height);
             for ( let i = 0; i < particleArray.length; i++){
-                particleArray[i].draw();
-                particleArray[i].update();
+                particleArray[i].draw(ctx);
+                particleArray[i].update(ctx, mouse);
             }
             connect()
             requestAnimationFrame(animate)
         }
         animate()
+
     },[])
 
-    
-    
     return(
-        <div style={styles.body}>
+        <div className={styles.body}>
           <canvas ref={canvasRef} {...props} />  
         </div>
         
